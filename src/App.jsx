@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import 'boxicons/css/boxicons.min.css'
 import './App.css'
 
@@ -13,6 +13,17 @@ export default function App() {
   const [mealImages, setMealImages] = useState([])
   const cameraInputRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    const savedMealImages = localStorage.getItem('mealImages')
+    if (savedMealImages) {
+      setMealImages(JSON.parse(savedMealImages))
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('mealImages', JSON.stringify(mealImages))
+  }, [mealImages])
 
   const handleFileChange = useCallback((event) => {
     const file = event.target.files?.[0]
@@ -33,7 +44,7 @@ export default function App() {
         mealType,
         dayOfWeek,
         imageUrl: previewUrl,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }
       setMealImages(prev => [...prev, newMealImage])
       setSelectedFile(null)
@@ -126,15 +137,28 @@ export default function App() {
                 disabled={!selectedFile}
                 type="button"
               >
-                Save and Upload
+                Save Leftover Portion
               </button>
             </form>
           </div>
         </div>
 
+        <div className="tabs">
+          <div className="tabs-list">
+            {DAYS_OF_WEEK.map((day) => (
+              <button
+                key={day}
+                onClick={() => setDayOfWeek(day)}
+                className={`tab-button ${day === dayOfWeek ? 'active' : ''}`}
+              >
+                {day.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+
           <div className="tab-content">
             <div className="card">
-              <h3 className="card-title">{dayOfWeek}'s Leftover</h3>
+              <h3 className="card-title">Leftover portions on {dayOfWeek}</h3>
               <div className="card-content">
                 <div className="meals-grid">
                   {MEAL_TYPES.map((type) => (
@@ -143,7 +167,7 @@ export default function App() {
                       <div className="meal-images">
                         {mealImages
                           .filter((img) => img.mealType === type && img.dayOfWeek === dayOfWeek)
-                          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                           .map((img) => (
                             <div key={img.id} className="meal-image-container">
                               <img 
@@ -152,7 +176,7 @@ export default function App() {
                                 className="meal-image" 
                               />
                               <p className="meal-time">
-                                {img.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                {new Date(img.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                               </p>
                             </div>
                           ))}
@@ -165,6 +189,6 @@ export default function App() {
           </div>
         </div>
       </div>
+    </div>
   )
 }
-
