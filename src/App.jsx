@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react'
-import 'boxicons/css/boxicons.min.css'
-import './App.css'
+import { useState, useCallback, useRef } from 'react';
+import 'boxicons/css/boxicons.min.css';
+import './App.css';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner']
@@ -48,11 +48,11 @@ export default function App() {
     <div className="container">
       <div className="meal-tracker">
         <div className="card">
-          <h2 className="card-title">Remaining Portions</h2>
+          <h2 className="card-title">Leftover Portions</h2>
           <div className="card-content">
             <form className="form">
               <div className="form-group">
-                <label htmlFor="meal-type">Meal Type</label>
+                <label htmlFor="meal-type">Meal Types</label>
                 <select 
                   id="meal-type" 
                   value={mealType} 
@@ -68,7 +68,7 @@ export default function App() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="day-of-week">Day of Week</label>
+                <label htmlFor="day-of-week">Days in A Week</label>
                 <select 
                   id="day-of-week" 
                   value={dayOfWeek} 
@@ -97,7 +97,7 @@ export default function App() {
                   </button>
                   <button type="button" onClick={triggerFileInput} className="btn btn-outline">
                     <i className="bx bx-upload"></i>
-                    Upload
+                    Upload Images
                   </button>
                 </div>
               </div>
@@ -114,28 +114,15 @@ export default function App() {
                 disabled={!selectedFile}
                 type="button"
               >
-                Save Leftover Portion
+                Save and Upload
               </button>
             </form>
           </div>
         </div>
 
-        <div className="tabs">
-          <div className="tabs-list">
-            {DAYS_OF_WEEK.map((day) => (
-              <button
-                key={day}
-                onClick={() => setDayOfWeek(day)}
-                className={`tab-button ${day === dayOfWeek ? 'active' : ''}`}
-              >
-                {day.slice(0, 3)}
-              </button>
-            ))}
-          </div>
-
           <div className="tab-content">
             <div className="card">
-              <h3 className="card-title">Leftover portions on {dayOfWeek}</h3>
+              <h3 className="card-title"> {dayOfWeek}'s Leftover</h3>
               <div className="card-content">
                 <div className="meals-grid">
                   {MEAL_TYPES.map((type) => (
@@ -166,6 +153,5 @@ export default function App() {
           </div>
         </div>
       </div>
-    </div>
   )
 }
