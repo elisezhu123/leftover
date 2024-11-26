@@ -14,17 +14,6 @@ export default function App() {
   const cameraInputRef = useRef(null)
   const fileInputRef = useRef(null)
 
-  useEffect(() => {
-    const savedMealImages = localStorage.getItem('mealImages')
-    if (savedMealImages) {
-      setMealImages(JSON.parse(savedMealImages))
-    }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('mealImages', JSON.stringify(mealImages))
-  }, [mealImages])
-
   const handleFileChange = useCallback((event) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -44,13 +33,23 @@ export default function App() {
         mealType,
         dayOfWeek,
         imageUrl: previewUrl,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
       }
       setMealImages(prev => [...prev, newMealImage])
       setSelectedFile(null)
       setPreviewUrl(null)
     }
   }, [selectedFile, previewUrl, mealType, dayOfWeek])
+
+  const cleanupOldImages = useCallback(() => {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    setMealImages(prevImages => prevImages.filter(img => img.timestamp > oneWeekAgo));
+  }, []);
+
+  useEffect(() => {
+    const cleanup = setInterval(cleanupOldImages, 24 * 60 * 60 * 1000); // Run daily
+    return () => clearInterval(cleanup);
+  }, [cleanupOldImages]);
 
   const triggerCameraInput = () => {
     cameraInputRef.current?.click()
@@ -120,7 +119,7 @@ export default function App() {
                   </button>
                   <button type="button" onClick={triggerFileInput} className="btn btn-outline">
                     <i className="bx bx-image"></i>
-                    Choose Photo
+                    Choose Pictures
                   </button>
                 </div>
               </div>
@@ -137,7 +136,7 @@ export default function App() {
                 disabled={!selectedFile}
                 type="button"
               >
-                Save Leftover Portion
+                Save and Upload
               </button>
             </form>
           </div>
@@ -158,7 +157,7 @@ export default function App() {
 
           <div className="tab-content">
             <div className="card">
-              <h3 className="card-title">Leftover portions on {dayOfWeek}</h3>
+              <h3 className="card-title">{dayOfWeek}'s Leftover</h3>
               <div className="card-content">
                 <div className="meals-grid">
                   {MEAL_TYPES.map((type) => (
@@ -167,7 +166,7 @@ export default function App() {
                       <div className="meal-images">
                         {mealImages
                           .filter((img) => img.mealType === type && img.dayOfWeek === dayOfWeek)
-                          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
                           .map((img) => (
                             <div key={img.id} className="meal-image-container">
                               <img 
@@ -176,7 +175,7 @@ export default function App() {
                                 className="meal-image" 
                               />
                               <p className="meal-time">
-                                {new Date(img.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                {img.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                               </p>
                             </div>
                           ))}
@@ -192,3 +191,4 @@ export default function App() {
     </div>
   )
 }
+
